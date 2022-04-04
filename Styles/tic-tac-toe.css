@@ -25,7 +25,7 @@ p {
     font-family: "Helvetica Neue", sans-serif;
     font-size: 16px;
     text-align: center;
-    margin: 5px 0 50px 0;
+    margin: 5px 0;
     color: #FFFFFF;
 }
 
@@ -38,6 +38,46 @@ a {
 
 a:visited {
     color: #BB86FC;
+}
+
+/* =================================================
+ * message styles
+ * ================================================= */
+
+#game-message {
+    font-family: "Helvetica Neue", sans-serif;
+    font-size: inherit;
+    text-align: center;
+    margin: 25px 0;
+    transition: all 1s;
+}
+
+#game-message.error {
+    color: #CF6679;
+}
+
+#game-message.success {
+    color: #4caf50;
+}
+
+#game-message.visible {
+    visibility: visible;
+    opacity: 100%;
+}
+
+#game-message.invisible {
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* keeps the height when there is no error. */
+#game-message:empty:before {
+    display: inline-block;
+    content: '';
+}
+
+.spacing {
+    margin: 15px 0;
 }
 
 /* =================================================
@@ -54,7 +94,7 @@ body {
 #tic-tac-toe {
     width: fit-content;
     height: auto;
-    margin: 0 auto;
+    margin: 50px auto 0 auto;
     display: block;
 }
 

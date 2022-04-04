@@ -1,5 +1,3 @@
-/** @author Thibeau Fuhrer <fuhrer@thibeau.ch> */
-
 import { State, PLAYER_CIRCLE, PLAYER_CROSS } from './state';
 import { Opponent } from './opponent';
 
@@ -7,8 +5,21 @@ import { Opponent } from './opponent';
  * @type {object}
  */
 const SELECTOR = {
+	message: 'game-message',
 	restart: 'game-restart',
 	grid: 'game-grid',
+};
+
+/**
+ * @type {object}
+ */
+const CSS = {
+	success: 'success',
+	error: 'error',
+	invisible: 'invisible',
+	visible: 'visible',
+	circle: 'circle',
+	cross: 'cross',
 };
 
 /**
@@ -32,27 +43,93 @@ const opponent = new Opponent();
 let game_state = new State();
 
 /**
- * @type {number}
+ * @param {number} player
+ * @return {string}
  */
-let next_player = PLAYER_CROSS;
+let getSymbol = function (player) {
+	return (PLAYER_CIRCLE === player) ?
+		CSS.circle : CSS.cross
+	;
+};
+
+/**
+ * @param {string} message
+ * @param {boolean} permanently
+ */
+let displayError = function (message, permanently = false) {
+	let element = document.getElementById(SELECTOR.error);
+
+	element.innerHTML = message
+	element.className = `${CSS.visible} ${CSS.error}`;
+
+	if (!permanently) {
+		setTimeout(
+			function () {
+				element.className = CSS.invisible;
+			},
+			2000
+		);
+	}
+};
+
+/**
+ * @param {string} message
+ */
+let displaySuccess = function (message) {
+	let element = document.getElementById(SELECTOR.error);
+
+	element.innerHTML = message
+	element.className = `${CSS.visible} ${CSS.success}`;
+};
 
 /**
  * @param {number} index
  */
-let processMoveHook = function (index) {
-	let entry = document.getElementById(index.toString());
-
-
-
+let humanPlayerMoveHook = function (index) {
+	// (redundantly) enable the restart button.
 	restart_button.disabled = false;
 
-	entry.className = (PLAYER_CIRCLE === next_player) ?
-		'circle' : 'cross'
-	;
+	// abort if there's already a winner.
+	if (null !== game_state.winner) {
+		return false;
+	}
 
-	next_player = (PLAYER_CIRCLE === next_player) ?
-		PLAYER_CROSS : PLAYER_CIRCLE
-	;
+	let human_move = processMove(index);
+	if (null !== human_move) {
+		displaySuccess(`Congratulations! You've managed to cheat &1F609;`);
+		return false;
+	}
+
+	let opponent_move = processMove(
+		opponent.getMove(game_state, PLAYER_CIRCLE)
+	);
+
+	if (null !== opponent_move) {
+		displayError(`I'm sorry, you've lost ... &1F642;`);
+		return false;
+	}
+}
+
+/**
+ * @param {number} index
+ * @return {number|null}
+ */
+let processMove = function (index) {
+	// abort if there's already a winner.
+	if (null !== game_state.winner) {
+		return game_state.winner;
+	}
+
+	try {
+		game_state.makeMove(index, current_player);
+		document
+			.getElementById(index.toString())
+			.className = getSymbol(current_player)
+		;
+	} catch (error) {
+		displayError(error.message);
+		return null;
+	}
 };
 
 /**
@@ -60,7 +137,6 @@ let processMoveHook = function (index) {
  */
 let restartGameHook = function () {
 	game_state = new State();
-	next_player = PLAYER_CROSS;
 	restart_button.disabled = true;
 
 	// remove all circles and crosses from the grid.
@@ -79,7 +155,7 @@ window.onload = function () {
 		'click',
 		function (event) {
 			if (event.target.matches('li')) {
-				processMoveHook(parseInt(event.target.id))
+				humanPlayerMoveHook(parseInt(event.target.id))
 			}
 		}
 	);

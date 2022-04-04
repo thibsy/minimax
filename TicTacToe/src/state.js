@@ -52,7 +52,7 @@ export class State {
 	 * @return {number|null}
 	 */
 	get winner() {
-		return getWinner(this.grid);
+		return this.winner;
 	}
 
 	/**
@@ -63,6 +63,7 @@ export class State {
 	makeMove(index, player) {
 		maybeAbortMove(this, index, player);
 		this.grid[index] = player;
+		this.winner = getWinner(this.grid);
 	}
 
 	/**
@@ -90,15 +91,15 @@ export class State {
  */
 let maybeAbortMove = function (state, index, player) {
 	if (null !== state.winner) {
-		throw new Error(`Player '${state.winner}' has already won.`);
+		throw new Error(`There is already a winner!`);
 	}
 
-	if (1 > index || index > 9) {
-		throw new RangeError(`Index '${index}' is not between 1 and 9.`);
+	if (0 > index || index > 8) {
+		throw new RangeError(`Index is not between 0 and 8.`);
 	}
 
 	if (null !== state.grid[index]) {
-		throw new Error(`Index '${index}' belongs to player '${state.grid[index]}'.`);
+		throw new Error(`This field is already taken.`);
 	}
 }
 
