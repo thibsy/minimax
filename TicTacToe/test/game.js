@@ -9,8 +9,10 @@ describe('TicTacToe logic', function () {
 			`<html lang="en">
 				<body>
 					<main>
-						<p id="game-message"></p>
-						<ul id="game-board"></ul>
+						<p id="game-error"></p>
+						<ul id="game-board">
+							<div id="game-overlay"><p id="game-message"></p></div>
+						</ul>
 						<button id="game-restart"><button/>
 					</main>
 				</body>
@@ -128,7 +130,7 @@ describe('TicTacToe logic', function () {
 		assert.strictEqual(game.isGameOver(), true);
 	});
 
-	it('Board hook displays winner', function () {
+	it('Board hook displays win-overlay correctly.', function () {
 		let game = new Game();
 		game.setupDOM();
 		game.current_player = {symbol: 'circle'};
@@ -140,12 +142,12 @@ describe('TicTacToe logic', function () {
 		];
 		game.boardHook(0);
 
+		assert.strictEqual(game.overlay.className.includes('success'), true);
+		assert.strictEqual(game.overlay.className.includes('visible'), true);
 		assert.notStrictEqual(game.message.innerHTML, '');
-		assert.strictEqual(game.message.className.includes('visible'), true);
-		assert.strictEqual(game.message.className.includes('success'), true);
 	});
 
-	it('Board hook displays game-over', function () {
+	it('Board hook displays loose-overlay correctly.', function () {
 		let game = new Game();
 		game.setupDOM();
 		game.current_player = {symbol: 'circle'};
@@ -155,12 +157,27 @@ describe('TicTacToe logic', function () {
 			'circle', 'cross', 'cross',
 			'circle', 'cross', 'circle',
 		];
-
 		game.boardHook(0);
 
+		assert.strictEqual(game.overlay.className.includes('failure'), true);
+		assert.strictEqual(game.overlay.className.includes('visible'), true);
 		assert.notStrictEqual(game.message.innerHTML, '');
-		assert.strictEqual(game.message.className.includes('visible'), true);
-		assert.strictEqual(game.message.className.includes('failure'), true);
+	});
+
+	it('Board hook displays tie-overlay correctly.', function () {
+		let game = new Game();
+		game.setupDOM();
+		game.current_player = {symbol: 'cross'};
+		game.human = game.current_player;
+		game.state.board = [
+			null, 'circle', 'circle',
+			'circle', 'cross', 'cross',
+			'circle', 'cross', 'circle',
+		];
+		game.boardHook(0);
+
+		assert.strictEqual(game.overlay.className.includes('visible'), true);
+		assert.notStrictEqual(game.message.innerHTML, '');
 	});
 
 	it('Restart hook removes all symbols.', function () {

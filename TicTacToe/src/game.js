@@ -6,8 +6,10 @@ import { State } from './state.js';
  * @type {object}
  */
 const SELECTORS = {
-	message: 'game-message',
 	restart: 'game-restart',
+	overlay: 'game-overlay',
+	message: 'game-message',
+	error:   'game-error',
 	board:	 'game-board',
 };
 
@@ -19,24 +21,20 @@ const CLASSES = {
 	visible:   'visible',
 	success:   'success',
 	failure:   'failure',
-	common:	   'common',
 };
 
 /**
  * @type {object}
  */
 const MESSAGES = {
-	computer_won: `I'm sorry, you've lost!`,
-	human_won: `Congratulations! You've managed to cheat somehow!`,
-	tie: `Congratulations, a tie ain't bad!`,
+	win:   `You've won!`,
+	loose: `You've lost!`,
+	tie:   `It's a tie!`,
 };
 
 export class Game {
 
-	/**
-	 * @type {HTMLElement}
-	 */
-	message;
+	// DOM elements:
 
 	/**
 	 * @type {HTMLButtonElement}
@@ -44,14 +42,36 @@ export class Game {
 	restart;
 
 	/**
-	 * @type {HTMLElement}
+	 * @type {HTMLDivElement}
+	 */
+	overlay;
+
+	/**
+	 * @type {HTMLParagraphElement}
+	 */
+	message;
+
+	/**
+	 * @type {HTMLParagraphElement}
+	 */
+	error;
+
+	/**
+	 * @type {HTMLUListElement}
 	 */
 	board;
+
+	// Game elements:
 
 	/**
 	 * @type {Player}
 	 */
 	current_player;
+
+	/**
+	 * @type {Player|null}
+	 */
+	winner;
 
 	/**
 	 * @type {Player}
@@ -64,11 +84,6 @@ export class Game {
 	human;
 
 	/**
-	 * @type {Player|null}
-	 */
-	winner;
-
-	/**
 	 * @type {State}
 	 */
 	state;
@@ -78,19 +93,23 @@ export class Game {
 	 * @throws {Error}
 	 */
 	constructor() {
-		this.message = document.getElementById(SELECTORS.message);
+		this.overlay = document.getElementById(SELECTORS.overlay);
 		this.restart = document.getElementById(SELECTORS.restart);
+		this.message = document.getElementById(SELECTORS.message);
+		this.error   = document.getElementById(SELECTORS.error);
 		this.board 	 = document.getElementById(SELECTORS.board);
 
-		if (null === this.message || null === this.restart || null === this.board) {
+		if (null === this.error || null === this.restart ||
+			null === this.board || null === this.overlay || null === this.message
+		) {
 			throw new Error(`Could not retrieve all necessary elements from DOM.`);
 		}
 
 		this.current_player = new Player('cross');
 		this.computer = new Minimax('circle');
 		this.human = this.current_player;
-		this.winner = null;
 		this.state = new State();
+		this.winner = null;
 	}
 
 	/**
@@ -102,8 +121,8 @@ export class Game {
 		this.board.addEventListener('click', (event) => { this.delegateHook(event) });
 
 		this.restart.disabled = true;
-		this.message.className = CLASSES.invisible
-		this.message.innerHTML = '';
+		this.resetOverlay();
+		this.resetError();
 
 		for (let i = 0, i_max = 9; i < i_max; i++) {
 			let list_item = document.createElement('li');
@@ -114,6 +133,7 @@ export class Game {
 
 	/**
 	 * @param {MouseEvent} event
+	 * @return {void}
 	 */
 	delegateHook(event) {
 		if (event.target.matches('li')) {
@@ -126,12 +146,12 @@ export class Game {
 	 * @return {void}
 	 */
 	boardHook(index) {
-		this.restart.disabled = false;
-
 		let list_item = document.getElementById(index.toString());
 		if ('' !== list_item.className || null !== this.winner) {
 			return;
 		}
+
+		this.restart.disabled = false;
 
 		try {
 			this.state.addMove(this.current_player, index);
@@ -139,21 +159,12 @@ export class Game {
 
 			list_item.className = this.current_player.symbol;
 		} catch (failure) {
-			this.showMessage(failure.message, CLASSES.failure);
+			this.showError(failure.message);
 			return;
 		}
 
 		if (this.isGameOver()) {
-			if (null !== this.winner && this.winner.symbol === this.computer.symbol) {
-				this.showMessage(MESSAGES.computer_won, CLASSES.failure, false);
-			}
-			if (null !== this.winner && this.winner.symbol === this.human.symbol) {
-				this.showMessage(MESSAGES.human_won, CLASSES.success, false);
-			}
-			if (null === this.winner) {
-				this.showMessage(MESSAGES.tie, CLASSES.common, false);
-			}
-
+			this.showOverlayByState();
 			return;
 		}
 
@@ -171,24 +182,11 @@ export class Game {
 
 		this.restart.disabled = true;
 		this.current_player = this.human;
-		this.winner = null;
 		this.state = new State();
+		this.winner = null;
 
-		this.resetMessage();
-	}
-
-	/**
-	 * @param {string} message
-	 * @param {string} type
-	 * @param {boolean} temporary
-	 */
-	showMessage(message, type, temporary = false) {
-		this.message.innerHTML = message;
-		this.message.className = `${type} ${CLASSES.visible}`;
-
-		if (temporary) {
-			setTimeout(this.resetMessage, 2000);
-		}
+		this.resetOverlay();
+		this.resetError();
 	}
 
 	/**
@@ -199,6 +197,20 @@ export class Game {
 			this.current_player = this.computer;
 		} else {
 			this.current_player = this.human;
+		}
+	}
+
+	/**
+	 * @return {Player|null}
+	 */
+	getWinner() {
+		switch (this.state.getWinner()) {
+			case this.computer.symbol:
+				return this.computer;
+			case this.human.symbol:
+				return this.human;
+			default:
+				return null;
 		}
 	}
 
@@ -215,23 +227,59 @@ export class Game {
 	/**
 	 * @return {void}
 	 */
-	resetMessage() {
-		this.message.className = CLASSES.invisible
+	showOverlayByState() {
+		if (null === this.winner) {
+			this.showOverlay(MESSAGES.tie);
+			return;
+		}
+
+		if (this.winner.symbol === this.computer.symbol) {
+			this.showOverlay(MESSAGES.loose, CLASSES.failure);
+		}
+		if (this.winner.symbol === this.human.symbol) {
+			this.showOverlay(MESSAGES.win, CLASSES.success);
+		}
+	}
+
+	/**
+	 * @param {string} message
+	 * @param {string|null} type
+	 * @return {void}
+	 */
+	showOverlay(message, type = null) {
+		this.message.innerHTML = message;
+		this.overlay.className = (null !== type) ?
+			`${CLASSES.visible} ${type}` :
+			`${CLASSES.visible}`
+		;
+	}
+
+	/**
+	 * @return {void}
+	 */
+	resetOverlay() {
+		this.overlay.className = CLASSES.invisible;
 		this.message.innerHTML = '';
 	}
 
 	/**
-	 * @return {Player|null}
+	 * @param {string} message
+	 * @return {void}
 	 */
-	getWinner() {
-		switch (this.state.getWinner()) {
-			case this.computer.symbol:
-				return this.computer;
-			case this.human.symbol:
-				return this.human;
-			default:
-				return null;
-		}
+	showError(message) {
+		this.error.className = `${CLASSES.failure} ${CLASSES.visible}`;
+		this.error.innerHTML = message;
+
+		// hide error message again after 2 seconds.
+		setTimeout(this.resetError, 2000);
+	}
+
+	/**
+	 * @return {void}
+	 */
+	resetError() {
+		this.error.className = CLASSES.invisible
+		this.error.innerHTML = '';
 	}
 
 }

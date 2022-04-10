@@ -29,22 +29,27 @@ p {
     color: #FFFFFF;
 }
 
-a {
+a, a:visited {
     font-family: "Helvetica Neue", sans-serif;
     font-size: inherit;
     text-decoration: none;
     color: #BB86FC;
 }
 
-a:visited {
-    color: #BB86FC;
+.important {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.spacing {
+    margin: 15px 0;
 }
 
 /* =================================================
  * message styles
  * ================================================= */
 
-#game-message {
+#game-error {
     font-family: "Helvetica Neue", sans-serif;
     font-size: inherit;
     text-align: center;
@@ -52,32 +57,56 @@ a:visited {
     transition: all 1s;
 }
 
-#game-message.failure {
-    color: #CF6679;
-}
-
-#game-message.success {
-    color: #4caf50;
-}
-
-#game-message.visible {
-    visibility: visible;
-    opacity: 100%;
-}
-
-#game-message.invisible {
-    visibility: hidden;
-    opacity: 0;
-}
-
 /* keeps the height when there is no error. */
-#game-message:empty:before {
+#game-error:empty:before {
     display: inline-block;
     content: '';
 }
 
-.spacing {
-    margin: 15px 0;
+.failure {
+    color: #CF6679;
+}
+
+.success {
+    color: #4caf50;
+}
+
+.visible {
+    visibility: visible;
+    opacity: 100%;
+}
+
+.invisible {
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* =================================================
+ * overlay styles
+ * ================================================= */
+
+#game-overlay {
+    width: 100%;
+    height: 100%;
+    background: rgba(132, 132, 132, 0.6);
+    color: #FFFFFF;
+    position: absolute;
+    align-items: center;
+    display: flex;
+    z-index: 20;
+    transition: all 0.5s ease;
+}
+
+#game-overlay.failure {
+    background: rgba(207, 102, 121, 0.6);
+}
+
+#game-overlay.success {
+    background: rgba(76, 175, 80, 0.6);
+}
+
+#game-overlay p {
+    margin: 0 auto;
 }
 
 /* =================================================
@@ -124,6 +153,7 @@ body {
     flex-wrap: wrap;
     display: flex;
     cursor: pointer;
+    position: relative;
 }
 
 #game-board li {
