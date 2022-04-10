@@ -22,6 +22,15 @@ const CLASSES = {
 	common:	   'common',
 };
 
+/**
+ * @type {object}
+ */
+const MESSAGES = {
+	computer_won: `I'm sorry, you've lost!`,
+	human_won: `Congratulations! You've managed to cheat somehow!`,
+	tie: `Congratulations, a tie ain't bad!`,
+};
+
 export class Game {
 
 	/**
@@ -136,15 +145,13 @@ export class Game {
 
 		if (this.isGameOver()) {
 			if (null !== this.winner && this.winner.symbol === this.computer.symbol) {
-				this.showMessage('computer won', CLASSES.failure, false);
+				this.showMessage(MESSAGES.computer_won, CLASSES.failure, false);
 			}
-
 			if (null !== this.winner && this.winner.symbol === this.human.symbol) {
-				this.showMessage('human won', CLASSES.success, false);
+				this.showMessage(MESSAGES.human_won, CLASSES.success, false);
 			}
-
 			if (null === this.winner) {
-				this.showMessage(`it's a tie!`, CLASSES.common, false);
+				this.showMessage(MESSAGES.tie, CLASSES.common, false);
 			}
 
 			return;
