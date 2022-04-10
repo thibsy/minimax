@@ -1,7 +1,7 @@
 import { terser } from 'rollup-plugin-terser';
 
 export default {
-	input: './src/game.js',
+	input: './src/main.js',
 	output: {
 		file: './dist/main.min.js',
 		format: 'es',

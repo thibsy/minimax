@@ -1,14 +1,4 @@
 /**
- * @type {number}
- */
-export const PLAYER_CIRCLE = 0;
-
-/**
- * @type {number}
- */
-export const PLAYER_CROSS = 1;
-
-/**
  * @type {number[][]}
  */
 const WIN_CONDITIONS = [
@@ -23,111 +13,84 @@ const WIN_CONDITIONS = [
 ];
 
 export class State {
+
 	/**
 	 * @type {array}
 	 */
-	grid;
+	board;
 
 	/**
-	 * @type {number|null}
-	 */
-	winner;
-
-	/**
-	 * @constructor
+	 * Initializes an empty board.
 	 */
 	constructor() {
-		this.grid = getBlankGrid();
-		this.winner = null;
+		this.board = this.getBlank();
 	}
 
 	/**
 	 * @return {array}
 	 */
-	get grid() {
-		return this.grid;
+	get board() {
+		return this.board;
 	}
 
 	/**
-	 * @return {number|null}
-	 */
-	get winner() {
-		return this.winner;
-	}
-
-	/**
+	 * @param {Player} player
 	 * @param {number} index
-	 * @param {number} player
-	 * @throws {Error}
+	 * @return {void}
 	 */
-	makeMove(index, player) {
-		maybeAbortMove(this, index, player);
-		this.grid[index] = player;
-		this.winner = getWinner(this.grid);
+	addMove(player, index) {
+		this.abortInvalidMove(index);
+		this.board[index] = player.symbol;
 	}
 
 	/**
-	 * @param {number} index
-	 * @throws {Error}
+	 * Note that this method can only determine the winner reliably once.
+	 *
+	 * After the first time a winner is returned and further moves are
+	 * added to this state, the returned winner is just the first win-
+	 * condition that matches.
+	 *
+	 * @return {string|null}
 	 */
-	circle(index) {
-		this.makeMove(index, PLAYER_CIRCLE);
-	}
-
-	/**
-	 * @param {number} index
-	 * @throws {Error}
-	 */
-	cross(index) {
-		this.makeMove(index, PLAYER_CROSS);
-	}
-}
-
-/**
- * @param {State} state
- * @param {number} index
- * @param {number} player
- * @throws {Error}
- */
-let maybeAbortMove = function (state, index, player) {
-	if (null !== state.winner) {
-		throw new Error(`There is already a winner!`);
-	}
-
-	if (0 > index || index > 8) {
-		throw new RangeError(`Index is not between 0 and 8.`);
-	}
-
-	if (null !== state.grid[index]) {
-		throw new Error(`This field is already taken.`);
-	}
-}
-
-/**
- * @param {array} current_grid
- * @return {number|null}
- */
-let getWinner = function (current_grid) {
-	WIN_CONDITIONS.forEach(function (condition) {
-		if (null !== current_grid[condition[0]] &&
-			current_grid[condition[0]] === current_grid[condition[1]] &&
-			current_grid[condition[0]] === current_grid[condition[2]]
-		) {
-			return current_grid[condition[0]];
+	getWinner() {
+		for (let i = 0, i_max = WIN_CONDITIONS.length; i < i_max; i++) {
+			let condition = WIN_CONDITIONS[i];
+			if (null !== this.board[condition[0]] &&
+				this.board[condition[0]] === this.board[condition[1]] &&
+				this.board[condition[0]] === this.board[condition[2]]
+			) {
+				return this.board[condition[0]];
+			}
 		}
-	});
 
-	return null;
-}
-
-/**
- * @return {null[]}
- */
-let getBlankGrid = function () {
-	let blank_state = [];
-	for (let i = 0, i_max = 9; i <= i_max; i++) {
-		blank_state[i] = null;
+		return null;
 	}
 
-	return blank_state;
+	/**
+	 * @param {number} index
+	 * @return {void}
+	 * @throws {Error}
+	 */
+	abortInvalidMove(index) {
+		if (0 > index || index > 8) {
+			throw new Error(`Index is not between 0 and 8.`);
+		}
+
+		if (null !== this.board[index]) {
+			throw new Error(`This field is already taken.`);
+		}
+	}
+
+	/**
+	 * @return {null[]}
+	 */
+	getBlank() {
+		let board = [];
+		for (let i = 0, i_max = 9; i < i_max; i++) {
+			board[i] = null;
+		}
+
+		return board;
+	}
+
 }
