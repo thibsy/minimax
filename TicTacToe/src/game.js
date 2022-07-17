@@ -74,7 +74,7 @@ export class Game {
 	winner;
 
 	/**
-	 * @type {Player}
+	 * @type {Minimax}
 	 */
 	computer;
 
@@ -106,7 +106,7 @@ export class Game {
 		}
 
 		this.current_player = new Player('cross');
-		this.computer = new Minimax('circle');
+		this.computer = new Minimax(this.current_player, 'circle');
 		this.human = this.current_player;
 		this.state = new State();
 		this.winner = null;
@@ -146,29 +146,45 @@ export class Game {
 	 * @return {void}
 	 */
 	boardHook(index) {
-		let list_item = document.getElementById(index.toString());
-		if ('' !== list_item.className || null !== this.winner) {
+		// nothing to do if the game is over or the index not available (anymore).
+		if (this.isGameOver() || !this.state.isIndexAvailable(index)) {
 			return;
 		}
 
+		// disable the (re)enable button after every move.
 		this.restart.disabled = false;
 
-		try {
-			this.state.addMove(this.current_player, index);
-			this.winner = this.getWinner();
+		this.processMove(this.current_player, index);
 
-			list_item.className = this.current_player.symbol;
+		if (!this.isGameOver()) {
+			let index = this.computer.getMove([...this.state.board]); // pass by value
+			if (null !== index) {
+				this.processMove(this.computer, index);
+			}
+		}
+	}
+
+	/**
+	 * @param {Player} player
+	 * @param {number} index
+	 */
+	processMove(player, index) {
+		try {
+			this.state.addMove(player, index);
+			this.winner = this.getWinner();
+			this.toggleCurrentPlayer();
 		} catch (failure) {
 			this.showError(failure.message);
 			return;
 		}
 
+		// visualize the move on the board.
+		document.getElementById(index.toString()).className = player.symbol;
+
+		// visualize game-over state if necessary.
 		if (this.isGameOver()) {
 			this.showOverlayByState();
-			return;
 		}
-
-		this.toggleCurrentPlayer();
 	}
 
 	/**
@@ -236,6 +252,7 @@ export class Game {
 		if (this.winner.symbol === this.computer.symbol) {
 			this.showOverlay(MESSAGES.loose, CLASSES.failure);
 		}
+
 		if (this.winner.symbol === this.human.symbol) {
 			this.showOverlay(MESSAGES.win, CLASSES.success);
 		}

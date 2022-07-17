@@ -1,5 +1,6 @@
 import { Game } from './game.js';
 
 window.onload = function () {
-	(new Game()).setupDOM();
+	let game = new Game();
+	game.setupDOM();
 };

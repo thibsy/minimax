@@ -3,7 +3,7 @@ import { Minimax } from '../src/minimax.js';
 
 describe('Minimax algorithm', function () {
 
-	let minimax = new Minimax('circle');
+	let minimax = new Minimax({symbol: 'circle'}, 'cross');
 	let state = {
 		board: [
 			null, null, null,
@@ -13,8 +13,8 @@ describe('Minimax algorithm', function () {
 	};
 
 	it('Returns number between 0 and 8.', function () {
-		let next_move = minimax.getMove(state);
-		expect(next_move).to.be('number');
+		let next_move = minimax.getMove(state.board);
+		expect(next_move).to.be.a('number');
 		expect(next_move).to.be.above(-1);
 		expect(next_move).to.be.below(9);
 	});
@@ -26,7 +26,8 @@ describe('Minimax algorithm', function () {
 			'cross', 'cross', 'cross',
 		];
 
-		assert.strictEqual(minimax.getMove(state), 0);
+		let next_move = minimax.getMove(state.board);
+		assert.strictEqual(next_move, 0);
 	});
 
 	it('Returns null if all fields are taken.', function () {
@@ -36,11 +37,11 @@ describe('Minimax algorithm', function () {
 			'cross', 'cross', 'cross',
 		];
 
-		assert.strictEqual(minimax.getMove(state), null);
+		assert.strictEqual(minimax.getMove(state.board), null);
 	});
 
 	it('Extends player object.', function () {
-		expect(minimax.symbol).to.be('string');
+		expect(minimax.symbol).to.be.a('string');
 	});
 
 });

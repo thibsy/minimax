@@ -91,16 +91,17 @@ describe('TicTacToe logic', function () {
 		assert.strictEqual(document.getElementById('5').className, 'cross');
 	});
 
-	it('Board hook swaps current player.', function () {
-		let game = new Game();
-		game.setupDOM();
-		game.current_player = {symbol: 'cross'};
-		game.computer = game.current_player;
-		game.human = {symbol: 'circle'};
-		game.boardHook(5);
-
-		assert.strictEqual(game.current_player.symbol, 'circle');
-	});
+	// can be reconsidered if the computer is allowed to start a game.
+	// it('Board hook swaps current player.', function () {
+	// 	let game = new Game();
+	// 	game.setupDOM();
+	// 	game.current_player = {symbol: 'cross'};
+	// 	game.computer = game.current_player;
+	// 	game.human = {symbol: 'circle'};
+	// 	game.boardHook(5);
+	//
+	// 	assert.strictEqual(game.current_player.symbol, 'circle');
+	// });
 
 	it('Board hook advances game state.', function () {
 		let game = new Game();

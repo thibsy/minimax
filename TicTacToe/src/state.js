@@ -20,10 +20,11 @@ export class State {
 	board;
 
 	/**
-	 * Initializes an empty board.
+	 * Initializes a state for the given board or a new one.
+	 * @param {number[]|null} board
 	 */
-	constructor() {
-		this.board = this.getBlank();
+	constructor(board = null) {
+		this.board = board ?? this.getBlank();
 	}
 
 	/**
@@ -72,13 +73,33 @@ export class State {
 	 * @throws {Error}
 	 */
 	abortInvalidMove(index) {
-		if (0 > index || index > 8) {
+		if (!this.isIndexWithinRange(index)) {
 			throw new Error(`Index is not between 0 and 8.`);
 		}
 
-		if (null !== this.board[index]) {
+		if (!this.isIndexAvailable(index)) {
 			throw new Error(`This field is already taken.`);
 		}
+	}
+
+	/**
+	 * @param {number} index
+	 * @return {boolean}
+	 */
+	isIndexAvailable(index) {
+		if (!this.isIndexWithinRange(index)) {
+			return false;
+		}
+
+		return (null === this.board[index]);
+	}
+
+	/**
+	 * @param {number} index
+	 * @return {boolean}
+	 */
+	isIndexWithinRange(index) {
+		return (0 <= index && index <= 8);
 	}
 
 	/**
