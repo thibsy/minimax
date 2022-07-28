@@ -10,7 +10,7 @@
     "rollup-plugin-terser": "^7.0.2"
   },
   "scripts": {
-    "test": "mocha --recursive TicTacToe/test/*.js --require esm"
+    "test": "mocha --recursive test/*.js --require esm"
   },
   "type": "module"
 }

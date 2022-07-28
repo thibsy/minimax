@@ -7,31 +7,31 @@ describe('TicTacToe state object', function () {
 
 	it('Accepts available index.', function () {
 		let state  = new State();
-		state.addMove(player, 1);
+		state.makeMove(player, 1);
 	});
 
 	it('Does not accept taken index.', function () {
 		let state  = new State();
 		state.board[3] = 'circle';
 		expect(function () {
-			state.addMove(player, 3)
+			state.makeMove(player, 3)
 		}).to.throw(Error);
 	});
 
 	it('Does not accept index out of range.', function () {
 		let state = new State();
 		expect(function () {
-			state.addMove(player, 9)
+			state.makeMove(player, 9)
 		}).to.throw(Error);
 
 		expect(function () {
-			state.addMove(player, -1)
+			state.makeMove(player, -1)
 		}).to.throw(Error);
 	});
 
 	it('Updates board with player symbol.', function () {
 		let state  = new State();
-		state.addMove(player, 7);
+		state.makeMove(player, 7);
 		assert.strictEqual(state.board[7], player.symbol);
 	});
 

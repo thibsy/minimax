@@ -1,5 +1,5 @@
-import { Minimax } from './minimax.js';
-import { Player } from './player.js';
+import { Minimax } from './Player/minimax.js';
+import { Player } from './Player/player.js';
 import { State } from './state.js';
 
 /**
@@ -32,6 +32,9 @@ const MESSAGES = {
 	tie:   `It's a tie!`,
 };
 
+/**
+ * @author Thibeau Fuhrer <fuhrer@thibeau.ch>
+ */
 export class Game {
 
 	// DOM elements:
@@ -132,6 +135,8 @@ export class Game {
 	}
 
 	/**
+	 * Delegates only click-events on <li> elements to the board hook.
+	 *
 	 * @param {MouseEvent} event
 	 * @return {void}
 	 */
@@ -147,19 +152,22 @@ export class Game {
 	 */
 	boardHook(index) {
 		// nothing to do if the game is over or the index not available (anymore).
-		if (this.isGameOver() || !this.state.isIndexAvailable(index)) {
+		if (this.state.isGameOver() || !this.state.isIndexAvailable(index)) {
 			return;
 		}
 
-		// disable the (re)enable button after every move.
+		// (re)enable the reset button after every move.
 		this.restart.disabled = false;
 
 		this.processMove(this.current_player, index);
 
-		if (!this.isGameOver()) {
-			let index = this.computer.getMove([...this.state.board]); // pass by value
-			if (null !== index) {
-				this.processMove(this.computer, index);
+		if (!this.state.isGameOver()) {
+			let computers_move = this.computer.getMove(
+				new State([...this.state.board]) // pass by value
+			);
+
+			if (null !== computers_move) {
+				this.processMove(this.computer, computers_move);
 			}
 		}
 	}
@@ -170,9 +178,8 @@ export class Game {
 	 */
 	processMove(player, index) {
 		try {
-			this.state.addMove(player, index);
+			this.state.makeMove(player, index);
 			this.winner = this.getWinner();
-			this.toggleCurrentPlayer();
 		} catch (failure) {
 			this.showError(failure.message);
 			return;
@@ -182,9 +189,11 @@ export class Game {
 		document.getElementById(index.toString()).className = player.symbol;
 
 		// visualize game-over state if necessary.
-		if (this.isGameOver()) {
+		if (this.state.isGameOver()) {
 			this.showOverlayByState();
 		}
+
+		this.toggleCurrentPlayer();
 	}
 
 	/**
@@ -228,16 +237,6 @@ export class Game {
 			default:
 				return null;
 		}
-	}
-
-	/**
-	 * @return {boolean}
-	 */
-	isGameOver() {
-		return (
-			null !== this.state.getWinner() ||
-			!this.state.board.includes(null)
-		);
 	}
 
 	/**

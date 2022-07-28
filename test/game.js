@@ -112,25 +112,6 @@ describe('TicTacToe logic', function () {
 		assert.strictEqual(game.state.board[5], 'cross');
 	});
 
-	it('Board hook detects game-over.', function () {
-		let game = new Game();
-		game.setupDOM();
-		game.state.board = [
-			'cross', 'circle', 'circle',
-			'circle', 'cross', 'cross',
-			'circle', 'cross', 'circle',
-		];
-		assert.strictEqual(game.isGameOver(), true);
-
-		game.state.board = [
-			'cross', null, null,
-			null, 'cross', null,
-			null, null, 'cross',
-		];
-
-		assert.strictEqual(game.isGameOver(), true);
-	});
-
 	it('Board hook displays win-overlay correctly.', function () {
 		let game = new Game();
 		game.setupDOM();

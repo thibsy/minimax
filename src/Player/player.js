@@ -1,4 +1,7 @@
 
+/**
+ * @author Thibeau Fuhrer <fuhrer@thibeau.ch>
+ */
 export class Player {
 
 	/**

@@ -5,6 +5,6 @@ export default {
 	output: {
 		file: './dist/main.min.js',
 		format: 'es',
-		plugins: [terser()]
+		plugins: [terser()],
 	},
 };
