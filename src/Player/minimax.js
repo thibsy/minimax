@@ -74,7 +74,7 @@ export class Minimax extends Player {
 			let current_rating = this.minimax(
 				this.getOppositePlayer(player),
 				state,
-				depth++
+				(depth + 1)
 			);
 
 			state.undoMove(player, current_move);
