@@ -29,26 +29,34 @@ export class Minimax extends Player {
 			return null;
 		}
 
-		let possibilities = state.getPossibleMoves();
-		let best_rating = null;
-		let best_move = null;
+		let possible_moves = state.getPossibleMoves();
+		let ratings = [];
 
-		for (let i = 0, i_max = possibilities.length; i < i_max; i++) {
-			let current_move = possibilities[i];
+		for (let i = 0, i_max = possible_moves.length; i < i_max; i++) {
+			let current_move = possible_moves[i];
 
 			state.makeMove(this, current_move);
 
-			let current_rating = this.minimax(this.opponent, state);
+			ratings.push(this.minimax(this.opponent, state));
 
 			state.undoMove(this, current_move);
+		}
 
-			if (null === best_rating || current_rating > best_rating) {
-				best_rating = current_rating;
-				best_move = current_move;
+		let best_rating = Math.max(...ratings);
+		let best_moves = [];
+
+		for (let i = 0, i_max = ratings.length; i < i_max; i++) {
+			if (best_rating === ratings[i]) {
+				best_moves.push(possible_moves[i]);
 			}
 		}
 
-		return best_move;
+		// if there are multiple best moves, return one randomly.
+		if (1 < best_moves.length) {
+			return best_moves[Math.floor(Math.random() * best_moves.length)];
+		}
+
+		return best_moves[0];
 	}
 
 	/**
